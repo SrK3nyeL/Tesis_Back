@@ -1,0 +1,46 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard | Churn Intelligence</title>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">CI</span><span>Churn<br><b>Intelligence</b></span></div>
+    <nav><a class="active" href="/">Resumen</a><a href="/api/v1/clientes/">Clientes API</a><a href="/api/v1/predicciones/resultados/">Predicciones API</a><a href="/admin/">Administracion</a></nav>
+    <div class="user-box"><span>{{ request.user.get_full_name|default:request.user.username }}</span><small>{{ request.user.rol }}</small><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Salir</button></form></div>
+  </aside>
+  <main class="content">
+    <header><div><p class="eyebrow">Analitica predictiva</p><h1>Vista general</h1><p class="muted">Senales clave para anticipar el abandono de clientes.</p></div><span class="status-dot">Modelo {% if modelo %}activo{% else %}pendiente{% endif %}</span></header>
+    <section class="metrics">
+      <article><span>Clientes activos</span><strong>{{ clientes_registrados }}</strong><small>Base registrada</small></article>
+      <article><span>Predicciones</span><strong>{{ total_predicciones }}</strong><small>Historial acumulado</small></article>
+      <article><span>Riesgo de abandono</span><strong>{{ tasa_abandono }}%</strong><small>{{ abandono_predicho }} casos positivos</small></article>
+      <article><span>Probabilidad promedio</span><strong>{{ probabilidad_promedio }}%</strong><small>Estimacion del modelo</small></article>
+    </section>
+    <section class="grid-two">
+      <article class="panel">
+        <div class="panel-title"><div><p class="eyebrow">Segmentacion</p><h2>Niveles de riesgo</h2></div><span>{{ total_predicciones }} evaluados</span></div>
+        <div class="risk-row"><label><b>Alto</b><span>{{ riesgo.alto }} clientes</span></label><div><i class="high" style="width:{{ riesgo.alto_pct }}%"></i></div><strong>{{ riesgo.alto_pct }}%</strong></div>
+        <div class="risk-row"><label><b>Medio</b><span>{{ riesgo.medio }} clientes</span></label><div><i class="medium" style="width:{{ riesgo.medio_pct }}%"></i></div><strong>{{ riesgo.medio_pct }}%</strong></div>
+        <div class="risk-row"><label><b>Bajo</b><span>{{ riesgo.bajo }} clientes</span></label><div><i class="low" style="width:{{ riesgo.bajo_pct }}%"></i></div><strong>{{ riesgo.bajo_pct }}%</strong></div>
+      </article>
+      <article class="panel model-panel">
+        <div><p class="eyebrow">Rendimiento</p><h2>Modelo seleccionado</h2></div>
+        {% if modelo %}
+        <div class="model-name"><strong>{{ modelo.algoritmo }}</strong><span>v{{ modelo.version }}</span></div>
+        <div class="mini-metrics"><div><span>Recall</span><b>{{ modelo.metricas.recall|floatformat:3 }}</b></div><div><span>Precision</span><b>{{ modelo.metricas.precision|floatformat:3 }}</b></div><div><span>F1</span><b>{{ modelo.metricas.f1_score|floatformat:3 }}</b></div><div><span>ROC-AUC</span><b>{{ modelo.metricas.roc_auc|floatformat:3 }}</b></div></div>
+        {% else %}<p class="empty">Ejecuta <code>python manage.py entrenar_modelo</code> para publicar el modelo.</p>{% endif %}
+      </article>
+    </section>
+    <section class="panel table-panel">
+      <div class="panel-title"><div><p class="eyebrow">Atencion prioritaria</p><h2>Clientes con riesgo alto</h2></div><a href="/api/v1/predicciones/resultados/?riesgo=alto">Ver API</a></div>
+      <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Probabilidad</th><th>Modelo</th><th>Fecha</th></tr></thead><tbody>
+      {% for item in recientes %}<tr><td><b>{{ item.referencia_cliente|default:"Anonimo" }}</b></td><td><span class="pill high">{{ item.probabilidad|floatformat:3 }}</span></td><td>{{ item.version_modelo.version }}</td><td>{{ item.creado_en|date:"d/m/Y H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">Aun no existen predicciones de riesgo alto.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acceso | Churn Intelligence</title>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <div class="brand-mark">CI</div>
+    <p class="eyebrow">Sistema inteligente</p>
+    <h1>Churn Intelligence</h1>
+    <p class="muted">Accede al panel de analisis predictivo.</p>
+    {% if form.errors %}<div class="alert">Usuario o contrasena incorrectos.</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <label for="id_username">Usuario</label>
+      <input id="id_username" name="username" autocomplete="username" required autofocus>
+      <label for="id_password">Contrasena</label>
+      <input id="id_password" name="password" type="password" autocomplete="current-password" required>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit">Ingresar al dashboard</button>
+    </form>
+  </main>
+</body>
+</html>
