@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Resultados | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Trazabilidad</p><h1>Resultados de prediccion</h1><p class="muted">Consulta, filtra y exporta las evaluaciones almacenadas.</p></div><a class="primary-button" href="{% url 'dashboard:predecir' %}">Nueva prediccion</a></header>
+<form method="get" class="panel filter-bar">
+  <div class="field"><label for="cliente">Cliente</label><input class="form-control" id="cliente" name="cliente" value="{{ filtros.cliente|default:'' }}" placeholder="Codigo"></div>
+  <div class="field"><label for="riesgo">Riesgo</label><select class="form-control" id="riesgo" name="riesgo"><option value="">Todos</option><option value="alto" {% if filtros.riesgo == 'alto' %}selected{% endif %}>Alto</option><option value="medio" {% if filtros.riesgo == 'medio' %}selected{% endif %}>Medio</option><option value="bajo" {% if filtros.riesgo == 'bajo' %}selected{% endif %}>Bajo</option></select></div>
+  <div class="field"><label for="abandono">Clasificacion</label><select class="form-control" id="abandono" name="abandono"><option value="">Todas</option><option value="1" {% if filtros.abandono == '1' %}selected{% endif %}>Abandono</option><option value="0" {% if filtros.abandono == '0' %}selected{% endif %}>Permanece</option></select></div>
+  <button class="primary-button" type="submit">Filtrar</button><a class="secondary-button" href="{% url 'dashboard:resultados' %}">Limpiar</a>
+</form>
+<section class="panel table-panel">
+  <div class="panel-title"><div><p class="eyebrow">Historial</p><h2>{{ page_obj.paginator.count }} resultados</h2></div><a class="secondary-button compact" href="/api/v1/predicciones/resultados/exportar/{% if export_query %}?{{ export_query }}{% endif %}">Exportar CSV</a></div>
+  <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Clasificacion</th><th>Probabilidad</th><th>Riesgo</th><th>Modelo</th><th>Fecha</th><th></th></tr></thead><tbody>
+  {% for item in predicciones %}<tr><td><b>{{ item.referencia_cliente|default:"Anonimo" }}</b></td><td>{% if item.abandono_predicho %}Abandono{% else %}Permanece{% endif %}</td><td>{{ item.probabilidad|floatformat:4 }}</td><td><span class="risk-badge {{ item.nivel_riesgo }}">{{ item.get_nivel_riesgo_display }}</span></td><td>{{ item.version_modelo.version }}</td><td>{{ item.creado_en|date:"d/m/Y H:i" }}</td><td><a class="table-link" href="{% url 'dashboard:prediccion-detalle' item.pk %}">Detalle →</a></td></tr>{% empty %}<tr><td colspan="7" class="empty">No hay resultados para los filtros seleccionados.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% include "dashboard/pagination.html" %}
+{% endblock %}

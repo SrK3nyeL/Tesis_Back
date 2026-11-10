@@ -1,19 +1,11 @@
-{% load static %}
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard | Churn Intelligence</title>
-  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-</head>
-<body>
-  <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">CI</span><span>Churn<br><b>Intelligence</b></span></div>
-    <nav><a class="active" href="/">Resumen</a><a href="/api/v1/clientes/">Clientes API</a><a href="/api/v1/predicciones/resultados/">Predicciones API</a><a href="/admin/">Administracion</a></nav>
-    <div class="user-box"><span>{{ request.user.get_full_name|default:request.user.username }}</span><small>{{ request.user.rol }}</small><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Salir</button></form></div>
-  </aside>
-  <main class="content">
+{% extends "dashboard/base.html" %}
+{% block title %}Resumen | Churn Intelligence{% endblock %}
+{% block content %}
     <header><div><p class="eyebrow">Analitica predictiva</p><h1>Vista general</h1><p class="muted">Senales clave para anticipar el abandono de clientes.</p></div><span class="status-dot">Modelo {% if modelo %}activo{% else %}pendiente{% endif %}</span></header>
+    <section class="quick-actions">
+      <a class="primary-button" href="{% url 'dashboard:predecir' %}">Nueva prediccion</a>
+      <a class="secondary-button" href="{% url 'dashboard:lote-cargar' %}">Cargar CSV</a>
+    </section>
     <section class="metrics">
       <article><span>Clientes activos</span><strong>{{ clientes_registrados }}</strong><small>Base registrada</small></article>
       <article><span>Predicciones</span><strong>{{ total_predicciones }}</strong><small>Historial acumulado</small></article>
@@ -36,11 +28,9 @@
       </article>
     </section>
     <section class="panel table-panel">
-      <div class="panel-title"><div><p class="eyebrow">Atencion prioritaria</p><h2>Clientes con riesgo alto</h2></div><a href="/api/v1/predicciones/resultados/?riesgo=alto">Ver API</a></div>
+      <div class="panel-title"><div><p class="eyebrow">Atencion prioritaria</p><h2>Clientes con riesgo alto</h2></div><a href="{% url 'dashboard:resultados' %}?riesgo=alto">Ver todos</a></div>
       <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Probabilidad</th><th>Modelo</th><th>Fecha</th></tr></thead><tbody>
-      {% for item in recientes %}<tr><td><b>{{ item.referencia_cliente|default:"Anonimo" }}</b></td><td><span class="pill high">{{ item.probabilidad|floatformat:3 }}</span></td><td>{{ item.version_modelo.version }}</td><td>{{ item.creado_en|date:"d/m/Y H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">Aun no existen predicciones de riesgo alto.</td></tr>{% endfor %}
+      {% for item in recientes %}<tr><td><a href="{% url 'dashboard:prediccion-detalle' item.pk %}"><b>{{ item.referencia_cliente|default:"Anonimo" }}</b></a></td><td><span class="pill high">{{ item.probabilidad|floatformat:3 }}</span></td><td>{{ item.version_modelo.version }}</td><td>{{ item.creado_en|date:"d/m/Y H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">Aun no existen predicciones de riesgo alto.</td></tr>{% endfor %}
       </tbody></table></div>
     </section>
-  </main>
-</body>
-</html>
+{% endblock %}

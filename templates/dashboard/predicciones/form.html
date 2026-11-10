@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Nueva prediccion | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Inferencia individual</p><h1>Nueva prediccion</h1><p class="muted">Selecciona un cliente registrado o completa manualmente sus variables de servicio.</p></div><a class="secondary-button" href="{% url 'dashboard:resultados' %}">Ver historial</a></header>
+<form method="post" class="panel form-panel" id="predictionForm" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="form-section">
+    <div class="section-heading"><div><span class="step">1</span><h2>Origen de datos</h2></div><p>Usa un cliente existente o identifica el registro manual.</p></div>
+    <div class="form-grid two">
+      <div class="field full"><label for="{{ form.cliente.id_for_label }}">{{ form.cliente.label }}</label>{{ form.cliente }}<small>{{ form.cliente.help_text }}</small>{{ form.cliente.errors }}</div>
+      <div class="field"><label for="{{ form.customerID.id_for_label }}">{{ form.customerID.label }}</label>{{ form.customerID }}{{ form.customerID.errors }}</div>
+    </div>
+  </section>
+  <div id="manualFields">
+    <section class="form-section"><div class="section-heading"><div><span class="step">2</span><h2>Perfil del cliente</h2></div></div><div class="form-grid three">
+      {% for field in form %}{% if field.name in 'gender,SeniorCitizen,Partner,Dependents,tenure' %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}
+    </div></section>
+    <section class="form-section"><div class="section-heading"><div><span class="step">3</span><h2>Servicios contratados</h2></div></div><div class="form-grid three">
+      {% for field in form %}{% if field.name in 'PhoneService,MultipleLines,InternetService,OnlineSecurity,OnlineBackup,DeviceProtection,TechSupport,StreamingTV,StreamingMovies' %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}
+    </div></section>
+    <section class="form-section"><div class="section-heading"><div><span class="step">4</span><h2>Contrato y facturacion</h2></div></div><div class="form-grid three">
+      {% for field in form %}{% if field.name in 'Contract,PaperlessBilling,PaymentMethod,MonthlyCharges,TotalCharges' %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}
+    </div></section>
+  </div>
+  <div class="form-actions"><a class="secondary-button" href="{% url 'dashboard:web' %}">Cancelar</a><button class="primary-button" type="submit">Calcular riesgo</button></div>
+</form>
+{% endblock %}

@@ -26,6 +26,21 @@ python manage.py runserver
 
 El dashboard queda en `http://127.0.0.1:8000/`, la API en `http://127.0.0.1:8000/api/v1/`, el administrador en `http://127.0.0.1:8000/admin/` y la prueba de salud en `http://127.0.0.1:8000/health/`.
 
+## Interfaz web
+
+La interfaz usa Django Templates y sesiones. Incluye:
+
+- resumen ejecutivo con indicadores y clientes prioritarios;
+- prediccion individual desde cliente registrado o formulario manual;
+- procesamiento CSV con errores identificados por fila;
+- CRUD y filtros de clientes;
+- historial, filtros, detalle explicable y exportacion CSV;
+- metricas, matriz de confusion, importancia de variables y versiones;
+- gestion de usuarios restringida al rol administrador;
+- navegacion adaptable para escritorio y dispositivos moviles.
+
+Rutas principales: `/predecir/`, `/lotes/`, `/clientes/`, `/resultados/`, `/modelo/` y `/usuarios/`.
+
 Para PostgreSQL, copie `.env.example`, establezca `DB_ENGINE=postgresql` y complete las variables `DB_*`.
 
 ## Autenticacion API
@@ -115,3 +130,5 @@ Las pruebas cubren acceso protegido, token y revocacion, cuentas inactivas, clie
 
 La trazabilidad completa de los casos CP-00 a CP-18 del documento se encuentra en
 [`docs/MATRIZ_PRUEBAS.md`](docs/MATRIZ_PRUEBAS.md).
+Los registros individuales con resultados, evidencias, incidencias y observaciones estan en
+[`docs/REGISTRO_EJECUCION_CP00_CP18.md`](docs/REGISTRO_EJECUCION_CP00_CP18.md).

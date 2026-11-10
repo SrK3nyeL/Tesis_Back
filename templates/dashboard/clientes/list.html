@@ -1,0 +1,14 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Clientes | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Gestion de datos</p><h1>Clientes</h1><p class="muted">Administra los perfiles de servicio utilizados por el modelo.</p></div><a class="primary-button" href="{% url 'dashboard:cliente-nuevo' %}">Registrar cliente</a></header>
+<form method="get" class="panel filter-bar">
+  <div class="field"><label for="buscar">Codigo</label><input class="form-control" id="buscar" name="buscar" value="{{ request.GET.buscar|default:'' }}" placeholder="Buscar cliente"></div>
+  <div class="field"><label for="contrato">Contrato</label><select class="form-control" id="contrato" name="contrato"><option value="">Todos</option><option value="Month-to-month">Mes a mes</option><option value="One year">Un ano</option><option value="Two year">Dos anos</option></select></div>
+  <div class="field"><label for="activo">Estado</label><select class="form-control" id="activo" name="activo"><option value="">Todos</option><option value="1">Activos</option><option value="0">Inactivos</option></select></div>
+  <button class="primary-button" type="submit">Filtrar</button><a class="secondary-button" href="{% url 'dashboard:clientes' %}">Limpiar</a>
+</form>
+<section class="panel table-panel"><div class="panel-title"><div><p class="eyebrow">Base registrada</p><h2>{{ page_obj.paginator.count }} clientes</h2></div></div><div class="table-wrap"><table><thead><tr><th>Codigo</th><th>Contrato</th><th>Permanencia</th><th>Cargo mensual</th><th>Internet</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for item in clientes %}<tr><td><b>{{ item.customer_id }}</b></td><td>{{ item.contract }}</td><td>{{ item.tenure }} meses</td><td>S/ {{ item.monthly_charges }}</td><td>{{ item.internet_service }}</td><td><span class="risk-badge {% if item.activo %}bajo{% else %}alto{% endif %}">{% if item.activo %}Activo{% else %}Inactivo{% endif %}</span></td><td><div class="row-actions"><a href="{% url 'dashboard:cliente-editar' item.pk %}">Editar</a>{% if item.activo %}<a href="{% url 'dashboard:predecir' %}?cliente={{ item.pk }}">Predecir</a>{% endif %}</div></td></tr>{% empty %}<tr><td colspan="7" class="empty">No se encontraron clientes.</td></tr>{% endfor %}
+</tbody></table></div></section>{% include "dashboard/pagination.html" %}
+{% endblock %}

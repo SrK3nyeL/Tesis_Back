@@ -1,0 +1,8 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{% if object %}Editar cliente{% else %}Nuevo cliente{% endif %} | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Gestion de clientes</p><h1>{% if object %}Editar {{ object.customer_id }}{% else %}Registrar cliente{% endif %}</h1><p class="muted">Los datos personales no necesarios no se solicitan ni almacenan.</p></div><a class="secondary-button" href="{% url 'dashboard:clientes' %}">Volver</a></header>
+<form method="post" class="panel form-panel" novalidate>{% csrf_token %}{% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}<div class="form-grid three">
+{% for field in form %}<div class="field {% if field.name == 'payment_method' %}wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endfor %}
+</div><div class="form-actions"><a class="secondary-button" href="{% url 'dashboard:clientes' %}">Cancelar</a><button class="primary-button" type="submit">Guardar cliente</button></div></form>
+{% endblock %}

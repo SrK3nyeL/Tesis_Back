@@ -1,0 +1,11 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Cargar CSV | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Prediccion masiva</p><h1>Cargar archivo CSV</h1><p class="muted">Procesa multiples clientes y conserva el detalle de errores por fila.</p></div><a class="secondary-button" href="{% url 'dashboard:lotes' %}">Ver lotes</a></header>
+<form method="post" enctype="multipart/form-data" class="panel upload-panel" novalidate>{% csrf_token %}
+  <div class="upload-icon">CSV</div><h2>Selecciona el archivo Telco</h2><p>Maximo {{ CHURN_MAX_BATCH_ROWS|default:"5,000" }} registros. Codificacion UTF-8.</p>
+  <div class="field upload-field"><label for="{{ form.archivo.id_for_label }}">{{ form.archivo.label }}</label>{{ form.archivo }}<small>{{ form.archivo.help_text }}</small>{{ form.archivo.errors }}</div>
+  <details><summary>Columnas requeridas</summary><p>gender, SeniorCitizen, Partner, Dependents, tenure, PhoneService, MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling, PaymentMethod, MonthlyCharges y TotalCharges.</p></details>
+  <button class="primary-button" type="submit">Validar y procesar</button>
+</form>
+{% endblock %}

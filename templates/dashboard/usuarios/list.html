@@ -1,0 +1,8 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Usuarios | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Seguridad de acceso</p><h1>Usuarios</h1><p class="muted">Gestiona cuentas y roles autorizados del prototipo.</p></div><a class="primary-button" href="{% url 'dashboard:usuario-nuevo' %}">Crear usuario</a></header>
+<section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Cargo</th><th>Estado</th><th>Ultimo acceso</th><th></th></tr></thead><tbody>
+{% for item in usuarios %}<tr><td><b>{{ item.get_full_name|default:item.username }}</b><small class="block">@{{ item.username }}</small></td><td>{{ item.email }}</td><td>{{ item.get_rol_display }}</td><td>{{ item.cargo|default:"-" }}</td><td><span class="risk-badge {% if item.is_active %}bajo{% else %}alto{% endif %}">{% if item.is_active %}Activo{% else %}Inactivo{% endif %}</span></td><td>{{ item.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td><td><div class="row-actions"><a href="{% url 'dashboard:usuario-editar' item.pk %}">Editar</a><form method="post" action="{% url 'dashboard:usuario-estado' item.pk %}">{% csrf_token %}<button type="submit">{% if item.is_active %}Desactivar{% else %}Activar{% endif %}</button></form></div></td></tr>{% endfor %}
+</tbody></table></div></section>{% include "dashboard/pagination.html" %}
+{% endblock %}

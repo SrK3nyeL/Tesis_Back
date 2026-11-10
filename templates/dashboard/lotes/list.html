@@ -1,0 +1,8 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Lotes | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Procesamiento masivo</p><h1>Historial de lotes</h1><p class="muted">Consulta cargas, resultados exitosos y filas observadas.</p></div><a class="primary-button" href="{% url 'dashboard:lote-cargar' %}">Cargar CSV</a></header>
+<section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Archivo</th><th>Estado</th><th>Total</th><th>Exitosos</th><th>Fallidos</th><th>Fecha</th><th></th></tr></thead><tbody>
+{% for item in lotes %}<tr><td><b>{{ item.nombre_archivo }}</b><small class="block">{{ item.id }}</small></td><td><span class="state-badge {{ item.estado }}">{{ item.get_estado_display }}</span></td><td>{{ item.total_registros }}</td><td>{{ item.registros_exitosos }}</td><td>{{ item.registros_fallidos }}</td><td>{{ item.creado_en|date:"d/m/Y H:i" }}</td><td><a class="table-link" href="{% url 'dashboard:lote-detalle' item.pk %}">Detalle →</a></td></tr>{% empty %}<tr><td colspan="7" class="empty">Aun no se han procesado lotes.</td></tr>{% endfor %}
+</tbody></table></div></section>{% include "dashboard/pagination.html" %}
+{% endblock %}

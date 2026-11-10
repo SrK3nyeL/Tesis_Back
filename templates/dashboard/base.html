@@ -1,0 +1,42 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sistema inteligente de prediccion de abandono de clientes">
+  <title>{% block title %}Churn Intelligence{% endblock %}</title>
+  <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'dashboard:web' %}">
+      <span class="brand-mark">CI</span><span>Churn<br><b>Intelligence</b></span>
+    </a>
+    <nav aria-label="Navegacion principal">
+      <a class="{% if active_section == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:web' %}"><span>⌂</span> Resumen</a>
+      <a class="{% if active_section == 'predecir' %}active{% endif %}" href="{% url 'dashboard:predecir' %}"><span>◇</span> Nueva prediccion</a>
+      <a class="{% if active_section == 'lotes' %}active{% endif %}" href="{% url 'dashboard:lotes' %}"><span>⇧</span> Procesamiento CSV</a>
+      <a class="{% if active_section == 'clientes' %}active{% endif %}" href="{% url 'dashboard:clientes' %}"><span>◎</span> Clientes</a>
+      <a class="{% if active_section == 'resultados' %}active{% endif %}" href="{% url 'dashboard:resultados' %}"><span>▤</span> Resultados</a>
+      <a class="{% if active_section == 'modelo' %}active{% endif %}" href="{% url 'dashboard:modelo' %}"><span>⌁</span> Modelo y metricas</a>
+      {% if request.user.is_staff or request.user.rol == 'administrador' %}
+      <a class="{% if active_section == 'usuarios' %}active{% endif %}" href="{% url 'dashboard:usuarios' %}"><span>♙</span> Usuarios</a>
+      {% endif %}
+    </nav>
+    <div class="user-box">
+      <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+      <small>{{ request.user.get_rol_display }}</small>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Cerrar sesion</button></form>
+    </div>
+  </aside>
+  <main class="content">
+    <div class="mobile-bar"><button type="button" id="menuToggle" aria-label="Abrir menu">☰</button><b>Churn Intelligence</b></div>
+    {% if messages %}<div class="messages" aria-live="polite">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -16,6 +16,8 @@ from .services.model_service import ChurnModelService
 
 class CasosPruebaDocumentoTests(APITestCase):
     max_inference_seconds = 0.50
+    batch_size = 25
+    max_batch_seconds = 10.0
 
     def setUp(self):
         self.user = Usuario.objects.create_user(
@@ -177,8 +179,27 @@ class CasosPruebaDocumentoTests(APITestCase):
         started = perf_counter()
         results = [ChurnModelService.predecir(model_payload) for _ in range(20)]
         average = (perf_counter() - started) / len(results)
-        self.assertLess(average, self.max_inference_seconds)
+        self.assertLess(
+            average,
+            self.max_inference_seconds,
+            f"Inferencia promedio {average:.4f}s; umbral {self.max_inference_seconds:.2f}s",
+        )
         self.assertTrue(all(item["duracion_ms"] <= self.max_inference_seconds * 1000 for item in results))
+
+        batch_rows = [
+            {**self.payload, "customerID": f"CP-PERF-{index:03d}"}
+            for index in range(self.batch_size)
+        ]
+        batch_started = perf_counter()
+        response = self.client.post("/api/v1/predicciones/lote/", {"registros": batch_rows}, format="json")
+        batch_elapsed = perf_counter() - batch_started
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(response.data["registros_exitosos"], self.batch_size)
+        self.assertLess(
+            batch_elapsed,
+            self.max_batch_seconds,
+            f"Lote de {self.batch_size} filas: {batch_elapsed:.4f}s; umbral {self.max_batch_seconds:.2f}s",
+        )
 
     def test_cp15_privacidad_no_expone_credenciales_ni_pii_extra(self):
         private_payload = {

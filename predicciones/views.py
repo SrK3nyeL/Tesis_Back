@@ -2,7 +2,6 @@ import csv
 import io
 
 from django.http import HttpResponse
-from django.utils import timezone
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -17,22 +16,7 @@ from .serializers import (
     VersionModeloSerializer,
 )
 from .services.model_service import ChurnModelService, ModeloNoDisponible
-
-
-def guardar_prediccion(*, user, validated_data, lote=None, version=None):
-    payload = PrediccionEntradaSerializer.model_payload(validated_data)
-    result = ChurnModelService.predecir(payload)
-    cliente = validated_data.get("cliente")
-    reference = cliente.customer_id if cliente else validated_data.get("customerID", "")
-    return Prediccion.objects.create(
-        cliente=cliente,
-        referencia_cliente=reference,
-        datos_entrada=payload,
-        lote=lote,
-        version_modelo=version or ChurnModelService.version_modelo(),
-        creado_por=user,
-        **result,
-    )
+from .services.prediction_service import guardar_prediccion, procesar_lote
 
 
 class PrediccionIndividualView(APIView):
@@ -69,33 +53,12 @@ class PrediccionLoteView(APIView):
         if len(rows) > settings.CHURN_MAX_BATCH_ROWS:
             return Response({"detalle": f"El lote supera el maximo de {settings.CHURN_MAX_BATCH_ROWS} filas."}, status=400)
 
-        batch = LotePrediccion.objects.create(
-            nombre_archivo=file_name, total_registros=len(rows), creado_por=request.user
+        batch = procesar_lote(
+            user=request.user,
+            rows=rows,
+            file_name=file_name,
+            first_row=2 if uploaded else 1,
         )
-        errors, successful = [], 0
-        try:
-            version = ChurnModelService.version_modelo()
-            for row_number, row in enumerate(rows, start=2 if uploaded else 1):
-                serializer = PrediccionEntradaSerializer(data=row)
-                if serializer.is_valid():
-                    guardar_prediccion(
-                        user=request.user, validated_data=serializer.validated_data, lote=batch, version=version
-                    )
-                    successful += 1
-                else:
-                    errors.append({"fila": row_number, "errores": serializer.errors})
-            batch.registros_exitosos = successful
-            batch.registros_fallidos = len(rows) - successful
-            batch.errores = errors[:200]
-            batch.estado = (
-                LotePrediccion.Estado.COMPLETADO if not errors else LotePrediccion.Estado.COMPLETADO_ERRORES
-            )
-        except ModeloNoDisponible as exc:
-            batch.estado = LotePrediccion.Estado.FALLIDO
-            batch.errores = [{"detalle": str(exc)}]
-        finally:
-            batch.finalizado_en = timezone.now()
-            batch.save()
         response_status = 201 if batch.estado != LotePrediccion.Estado.FALLIDO else 503
         return Response(LotePrediccionSerializer(batch).data, status=response_status)
 

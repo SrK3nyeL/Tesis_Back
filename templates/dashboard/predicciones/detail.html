@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Prediccion {{ prediccion.pk }} | Churn Intelligence{% endblock %}
+{% block content %}
+<header><div><p class="eyebrow">Resultado individual</p><h1>{{ prediccion.referencia_cliente|default:"Cliente anonimo" }}</h1><p class="muted">Generada el {{ prediccion.creado_en|date:"d/m/Y H:i" }} por {{ prediccion.creado_por.username }}.</p></div><a class="secondary-button" href="{% url 'dashboard:resultados' %}">Volver</a></header>
+<section class="result-hero {{ prediccion.nivel_riesgo }}">
+  <div><span>Clasificacion</span><h2>{% if prediccion.abandono_predicho %}Posible abandono{% else %}Probable permanencia{% endif %}</h2><p>Riesgo {{ prediccion.get_nivel_riesgo_display|lower }}</p></div>
+  <div class="probability-ring" style="--value:{{ prediccion.probabilidad }}"><strong>{% widthratio prediccion.probabilidad 1 100 %}%</strong><span>probabilidad</span></div>
+</section>
+<section class="grid-two detail-grid">
+  <article class="panel"><div class="panel-title"><div><p class="eyebrow">Interpretabilidad</p><h2>Factores principales</h2></div></div>
+    <div class="factor-list">{% for factor in prediccion.explicacion %}<div class="factor"><div><b>{{ factor.variable }}</b><span>{{ factor.direccion|capfirst }} el riesgo</span></div><strong class="{% if factor.direccion == 'aumenta' %}positive{% else %}negative{% endif %}">{{ factor.contribucion|floatformat:4 }}</strong></div>{% empty %}<p class="empty">El modelo no genero factores individuales.</p>{% endfor %}</div>
+  </article>
+  <article class="panel"><p class="eyebrow">Trazabilidad</p><h2>Datos tecnicos</h2><dl class="detail-list"><div><dt>Version</dt><dd>{{ prediccion.version_modelo.version }}</dd></div><div><dt>Algoritmo</dt><dd>{{ prediccion.version_modelo.algoritmo }}</dd></div><div><dt>Umbral</dt><dd>{{ prediccion.version_modelo.umbral }}</dd></div><div><dt>Duracion</dt><dd>{{ prediccion.duracion_ms }} ms</dd></div>{% if prediccion.lote %}<div><dt>Lote</dt><dd><a href="{% url 'dashboard:lote-detalle' prediccion.lote.pk %}">{{ prediccion.lote.pk }}</a></dd></div>{% endif %}</dl></article>
+</section>
+<section class="panel table-panel"><div class="panel-title"><div><p class="eyebrow">Entrada validada</p><h2>Variables utilizadas</h2></div></div><div class="data-grid">{% for key,value in prediccion.datos_entrada.items %}<div><span>{{ key }}</span><b>{{ value }}</b></div>{% endfor %}</div></section>
+{% endblock %}

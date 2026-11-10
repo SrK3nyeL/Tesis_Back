@@ -2,26 +2,76 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Acceso seguro al sistema inteligente de prediccion de abandono">
   <title>Acceso | Churn Intelligence</title>
+  <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
-<body class="login-page">
-  <main class="login-card">
-    <div class="brand-mark">CI</div>
-    <p class="eyebrow">Sistema inteligente</p>
-    <h1>Churn Intelligence</h1>
-    <p class="muted">Accede al panel de analisis predictivo.</p>
-    {% if form.errors %}<div class="alert">Usuario o contrasena incorrectos.</div>{% endif %}
-    <form method="post">
-      {% csrf_token %}
-      <label for="id_username">Usuario</label>
-      <input id="id_username" name="username" autocomplete="username" required autofocus>
-      <label for="id_password">Contrasena</label>
-      <input id="id_password" name="password" type="password" autocomplete="current-password" required>
-      <input type="hidden" name="next" value="{{ next }}">
-      <button type="submit">Ingresar al dashboard</button>
-    </form>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-story" aria-label="Presentacion del sistema">
+      <div class="auth-glow one"></div><div class="auth-glow two"></div>
+      <div class="auth-grid-pattern"></div>
+      <a class="auth-brand" href="/">
+        <span class="auth-brand-mark">CI</span>
+        <span>Churn <b>Intelligence</b></span>
+      </a>
+      <div class="auth-copy">
+        <span class="auth-kicker"><i></i> Analitica predictiva para telecomunicaciones</span>
+        <h1>Anticipa el abandono.<br><em>Actua con evidencia.</em></h1>
+        <p>Convierte senales de contrato, consumo y comportamiento de pago en decisiones de retencion claras y oportunas.</p>
+        <div class="auth-metrics" aria-label="Indicadores del modelo">
+          <div><strong>78.3%</strong><span>Recall</span></div>
+          <div><strong>0.841</strong><span>ROC-AUC</span></div>
+          <div><strong>2.48×</strong><span>Lift @ 20%</span></div>
+        </div>
+      </div>
+      <div class="auth-signal" aria-hidden="true">
+        <span class="signal-label">Riesgo estimado</span>
+        <div class="signal-line"><i style="height:28%"></i><i style="height:42%"></i><i style="height:35%"></i><i style="height:64%"></i><i style="height:54%"></i><i style="height:82%"></i><i style="height:72%"></i><i style="height:94%"></i></div>
+        <div class="signal-caption"><span>Comportamiento historico</span><b>Modelo activo <i></i></b></div>
+      </div>
+      <p class="auth-footnote">Proyecto academico · Ingenieria de Software · 2026</p>
+    </section>
+
+    <section class="auth-form-side">
+      <div class="auth-card">
+        <div class="auth-card-top"><span class="auth-mobile-logo">CI</span><span class="secure-label">Acceso protegido</span></div>
+        <div class="auth-heading">
+          <p class="eyebrow">Bienvenido de nuevo</p>
+          <h2>Ingresa a tu espacio de analisis</h2>
+          <p>Utiliza las credenciales asignadas por el administrador.</p>
+        </div>
+        {% if form.errors %}<div class="auth-error" role="alert"><b>No pudimos iniciar sesion.</b><span>Verifica tu usuario y contrasena e intenta nuevamente.</span></div>{% endif %}
+        <form method="post" class="auth-form">
+          {% csrf_token %}
+          <div class="auth-field">
+            <label for="id_username">Usuario</label>
+            <div class="auth-input"><span aria-hidden="true">@</span><input id="id_username" name="username" value="{{ form.username.value|default:'' }}" autocomplete="username" placeholder="Tu nombre de usuario" required autofocus></div>
+          </div>
+          <div class="auth-field">
+            <label for="id_password">Contrasena</label>
+            <div class="auth-input"><span aria-hidden="true">•</span><input id="id_password" name="password" type="password" autocomplete="current-password" placeholder="Tu contrasena" required><button type="button" id="passwordToggle" aria-label="Mostrar contrasena">Ver</button></div>
+          </div>
+          <input type="hidden" name="next" value="{{ next }}">
+          <button class="auth-submit" type="submit"><span>Ingresar al sistema</span><b aria-hidden="true">→</b></button>
+        </form>
+        <div class="auth-security"><span>✓</span><p><b>Sesion segura</b><br>El acceso y las funcionalidades estan protegidos por rol.</p></div>
+      </div>
+      <p class="auth-support">¿Problemas para ingresar? Contacta al administrador del sistema.</p>
+    </section>
   </main>
+  <script>
+    const toggle = document.getElementById('passwordToggle');
+    const password = document.getElementById('id_password');
+    toggle.addEventListener('click', () => {
+      const visible = password.type === 'text';
+      password.type = visible ? 'password' : 'text';
+      toggle.textContent = visible ? 'Ver' : 'Ocultar';
+      toggle.setAttribute('aria-label', visible ? 'Mostrar contrasena' : 'Ocultar contrasena');
+    });
+  </script>
 </body>
 </html>
